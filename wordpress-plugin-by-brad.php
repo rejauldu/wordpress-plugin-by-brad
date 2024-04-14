@@ -9,8 +9,13 @@ Author URI: https://ict4today.com
 */
 class WordCountAndTimePlugin {
     function __construct() {
+        //'admin_menu' hook is used to to add an option in admin panel
         add_action('admin_menu',  array($this, 'adminPage'));
+
+        //Used to add any input fields in any pages in admin
         add_action('admin_init',  array($this, 'settings'));
+
+        //
         add_filter('the_content', array($this, 'ifWrap'));
     }
     function ifWrap($content) {
@@ -33,9 +38,21 @@ class WordCountAndTimePlugin {
     }
 
     function settings() {
+        /*
+        * add_settings_section( 'section_id', 'Section Title', 'render_section_callback', 'my_settings_page' );
+        * A group of input fields will have a section
+        */
         add_settings_section( 'wcp_first_section', null, null, 'word-count-settings-page');
-        
+
+        /*
+        * add_settings_field( 'field_id', 'Field Label', 'render_field_callback', 'my_settings_page', 'section_id' );
+        * Adds a new input field to the section
+        */
         add_settings_field( 'wcp_location', 'Display Location', array($this, 'locationHtml'), 'word-count-settings-page', 'wcp_first_section');
+        /* 
+        * register_setting( 'my_settings_group', 'my_setting_name', 'sanitize_callback' );
+        * Registers new settings to WordPress.
+        */
         register_setting('wordcountplugin', 'wcp_location', array('sanitize_callback' => array($this, 'sanitizeLocation'), 'default' => '0'));
 
         add_settings_field( 'wcp_headline', 'Headline Text', array($this, 'headlineHtml'), 'word-count-settings-page', 'wcp_first_section');
@@ -72,14 +89,19 @@ class WordCountAndTimePlugin {
     <?php }
     
     function adminPage() {
+        //add_options_page($page_title, $menu_title, $capability, $menu_slug, $callback = ”, int $position = null )
         add_options_page( 'Word Count Settings', 'Word Count', 'manage_options', 'word-count-settings-page', array($this, 'ourHtml'));
+        //After executing this function a menu will be added in Settings
     }
+    //This code will be visible when the menu item is clicked
     function ourHtml() {?>
         <div class="wrap">
             <h1>Word Count Settings</h1>
             <form action="options.php" method="POST">
                 <?php
+                    //First parameter of register_setting ie.my_setting_group
                     settings_fields( 'wordcountplugin' );
+                    //menu_slug
                     do_settings_sections( "word-count-settings-page" );
                     submit_button();
                 ?>
